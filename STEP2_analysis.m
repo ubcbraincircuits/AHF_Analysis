@@ -15,9 +15,9 @@ path_info.save_path           = 'B:\AHF\Outputs\';
 
 %% load files
 
-go_hit_files    =  helper.getAllFiles( path_info.go_hit );
-go_late_files   =  helper.getAllFiles( path_info.go_late );
-go_early_files  =  helper.getAllFiles( path_info.go_early );
+go_hit_files    =  getAllFiles( path_info.go_hit );
+go_late_files   =  getAllFiles( path_info.go_late );
+go_early_files  =  getAllFiles( path_info.go_early );
 
 assert(length(go_hit_files) == length(go_late_files) && ...
     length(go_hit_files) == length(go_early_files), ...
@@ -657,7 +657,7 @@ text(2.175, 35.5,'NS','color',[1 0 0])
 % ----------------------- save figure --------------------------
 % saveas(gcf,[path_info.save_path,'decoding_figure2'])
 
-%% more specific helper functions
+%% helper functions
 
 function roi = get_roi_from_data(data)
 % create binary roi mask from dFF data
@@ -719,4 +719,192 @@ end
 function effectsize = calc_effectsize(sample1,sample2)
     observeddifference = nanmean(sample1) - nanmean(sample2);
     effectsize = observeddifference / nanmean([std(sample1), std(sample2)]);
+end
+
+function t = xt(X,fs,DIM)
+% Generate time vector
+%
+% Inputs:
+%   X            (required, time series data)
+%   fs           (required, sampling frequency)
+%   DIM          (optional, dimension to calculate time across. Assume 
+%                assumes dimension with highest length is time)
+%
+% Outputs:
+%   t            (array of sample times)
+% 
+% Usage:  t = xt(X,fs,DIM)
+
+    if nargin < 3 || isempty(DIM), [~,DIM] = max(size(X)); end
+    t = (0:size(X,DIM)-1)/fs;
+end
+
+
+function newcell = catcell(varargin)
+    DIM = varargin{1};
+    assert(isscalar(DIM),'First input must be scalar indicating dimension to concatenate along.')
+    newcell = [];
+
+    for i = 2:nargin
+        if iscell(varargin{i})
+            for j = 1:length(varargin{i})
+                newcell = cat(DIM,newcell,varargin{i}{j});
+            end
+        else
+            newcell = cat(DIM,newcell,varargin{i});
+        end
+    end
+end
+
+function fileList = getAllFiles(dirName)
+
+  dirData = dir(dirName);      %# Get the data for the current directory
+  dirIndex = [dirData.isdir];  %# Find the index for directories
+  fileList = {dirData(~dirIndex).name}';  %'# Get a list of the files
+
+%   if ~isempty(fileList)
+%     fileList = cellfun(@(x) fullfile(dirName,x),...  %# Prepend path to files
+%                        fileList,'UniformOutput',false);
+%   end
+%   subDirs = {dirData(dirIndex).name};  %# Get a list of the subdirectories
+%   validIndex = ~ismember(subDirs,{'.','..'});  %# Find index of subdirectories
+%                                                %#   that are not '.' or '..'
+%   for iDir = find(validIndex)                  %# Loop over valid subdirectories
+%     nextDir = fullfile(dirName,subDirs{iDir});    %# Get the subdirectory path
+%     fileList = [fileList; getAllFiles(nextDir)];  %# Recursively call getAllFiles
+%   end
+
+end
+
+function [CL,CR, bregma] = get_coords(data,scale_factor,ROIs)
+% Get coordinates for cortical regions
+%
+% Inputs:
+%   data            (required, image or image series)
+%   scale_factor    (optional, scalar - specify mm/px)
+%   ROIs            (optional, cell array containing string of ROI labels)
+%
+% Outputs:
+%   CL, CR          (Nx2 coordinates [x,y] of ROIs on left and right
+%                   hemisphere)  
+%   bregma          (coordinates [x,y] of bregma location)
+% 
+% Usage:  coords = MM_getcoords(data,scale_factor,ROIs);
+
+    if nargin < 2 || isempty(scale_factor)
+        scale_factor = 8.4/size(data,1); 
+    end
+
+    if nargin < 3 || isempty(ROIs)
+        load ai.mat atlas
+        ROIs = atlas.areatag;
+    end
+
+    flag = 1;
+    while flag == 1
+        [bx,by] = get_breg(data); hold on
+
+        % pre-allocate
+        CL = nan(length(ROIs),2);
+        CR = nan(length(ROIs),2);
+
+        for i = 1:length(ROIs)
+            switch ROIs{i}
+                case 'A'
+                    ML=2.2932;   AP=-2.4962;
+                case 'AC'
+                    ML=0.097951; AP=1.8536;
+                case 'AL'
+                    ML=3.8271;   AP=-3.3393;
+                case 'AM'
+                    ML=1.6479;   AP=-2.696;
+                case 'AU'
+                    ML=4.5304;   AP=-2.901;
+                case 'BC'
+                    ML=3.4569;   AP=-1.727;
+                case 'FL'
+                    ML=2.4526;   AP=-0.5668;
+                case 'HL'
+                    ML=1.6942;   AP=-1.1457;
+                case 'L'
+                    ML=3.7126;   AP=-4.2615;
+                case 'LI'
+                    ML=4.0586;   AP=-4.2293;
+                case 'M1'
+                    ML=1.8603;   AP=0.64181;
+                case 'M2'
+                    ML=0.87002;  AP=1.4205;
+                case 'MO'
+                    ML=3.4917;   AP=0.58712;
+                case 'NO'
+                    ML=3.8001;   AP=-0.47733;
+                case 'PL'
+                    ML=3.5161;   AP=-5.2146;
+                case 'PM'
+                    ML=1.6217;   AP=-3.6247;
+                case 'POR'
+                    ML=4.2231;   AP=-4.755;
+                case 'RL'
+                    ML=3.1712;   AP=-2.849;
+                case 'RS'
+                    ML=0.62043;  AP=-2.8858;
+                case 'S2'
+                    ML=4.3977;   AP=-1.2027;
+                case 'TEA'
+                    ML=4.5657;   AP=-4.1622;
+                case 'TR'
+                    ML=1.8644;   AP=-2.0204;
+                case 'UN'
+                    ML=2.7979;   AP=-0.97112;
+                case 'V1'
+                    ML=2.5618;   AP=-4;
+                case 'ALM'
+                    ML=2.0;      AP=2.4;
+                case 'AMA'
+                    ML=1.6;      AP=2.4;
+                case 'OMA'
+                    ML=2.5;      AP=1.8;
+            end
+            ML = ML/scale_factor;
+            AP = AP/scale_factor;
+
+            CL(i,:) = round([bx-ML by-AP]);
+            CR(i,:) = round([bx+ML by-AP]);
+
+            plot(CL(i,1),CL(i,2),'r*');
+            plot(CR(i,1),CR(i,2),'r*');
+        end
+
+        % Prompt user to evaluate ROI placement
+        answer = questdlg('Would you like try again?', ...
+            'Attention', ...
+            'Yes','No','Cancel','Cancel');
+
+        switch answer
+            case 'Yes'
+                flag = 1;
+                close(gcf)
+            case 'No'
+                flag = 0;
+                bregma = round([bx, by]);
+            case 'Cancel'
+                close(gcf)
+                break
+        end    
+
+    end
+end
+
+function [bx,by] = get_breg(img)
+% Get Bregma Coordinates
+%
+% Input:  img      (Image data. Use fluorescence)
+% Output: [bx,by]  (x and y location of Bregma in pixels)
+% 
+% Usage:  [bx,by] = get_breg(img);
+
+    figure, imagesc(img(:,:,1)), colormap gray 
+    title('Click on Bregma')
+
+    [bx,by] = ginput(1);
 end
