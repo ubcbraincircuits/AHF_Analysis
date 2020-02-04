@@ -116,7 +116,7 @@ if ~cfg.singleDecoder
         
       case 'ridge'
         [coeff{iTime}, fitInfo{iTime}] ...
-                       = helper.ridgeRegression( pred, target, lambda, pseudoExp, [], jitter); 
+                       = ridgeRegression( pred, target, lambda, pseudoExp, [], jitter); 
     end
     
     bestCoeff{iTime}  = coeff{iTime}(:,fitInfo{iTime}.IndexMinMSE);
@@ -212,7 +212,7 @@ if cfg.numShuffles > 1
                                                                       numCVFolds, numCVSamples, [] );
           
         case 'ridge'
-          [bestCoeff{iShuff,iTime}, sfitInfo] = helper.ridgeRegression( pred, iTarget, bestLambdas(iTime), ...
+          [bestCoeff{iShuff,iTime}, sfitInfo] = ridgeRegression( pred, iTarget, bestLambdas(iTime), ...
                                                                  numCVFolds, numCVSamples, jitter);
           
       end
