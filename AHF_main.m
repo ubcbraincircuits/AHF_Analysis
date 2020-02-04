@@ -12,9 +12,9 @@ path_info.save_path           = 'B:\AHF\Outputs\';
 
 %% load files
 
-go_hit_files    =  getAllFiles( path_info.go_hit );
-go_late_files   =  getAllFiles( path_info.go_late );
-go_early_files  =  getAllFiles( path_info.go_early );
+go_hit_files    =  helper.getAllFiles( path_info.go_hit );
+go_late_files   =  helper.getAllFiles( path_info.go_late );
+go_early_files  =  helper.getAllFiles( path_info.go_early );
 
 assert(length(go_hit_files) == length(go_late_files) && ...
     length(go_hit_files) == length(go_early_files), ...
@@ -51,7 +51,8 @@ end
 
 figure, imagesc(plotfigs), colormap gray
 title('CLICK ON REFERENCE IMAGE');
-[x,y] = myginput; close gcf;
+[x,y] = ginput(1); close gcf;
+x = round(x); y = round(y);
 refnum = ceil(x/imsz);
 refgroup = ceil(y/imsz);
 
@@ -83,7 +84,7 @@ disp('Image registration complete')
 
 ROIS = {'V1','HL','FL','M1','RS','M2','BC','ALM'};
 scaling = 8.6/64; % field of view (mm/px)
-[CL,CR,bregma] = get_coords(fixed, scaling, ROIS);
+[CL,CR,bregma] = helper.get_coords(fixed, scaling, ROIS);
 
 num_rois = length(ROIS);
 trial_length = size(go_hit(1).reg.I, 3);
@@ -234,7 +235,7 @@ end
 figure('Renderer', 'painters', 'Position', [100 300 650 400]),
 subplot(2,5,1)
 for i = 1:size(HL_z)
-    plot(xt(HL_z,fs)-2.5, HL_z(i,:)-i,'k'), hold on
+    plot(helper.xt(HL_z,fs)-2.5, HL_z(i,:)-i,'k'), hold on
     axis([-3 2.5 -15 0.5]), axis off, title('HL'), 
     line([-2.8 -2.8], [-14.2 -13.2], 'color', [0 0 0]),
     line([-2.8 -1.8], [-14.2 -14.2], 'color', [0 0 0]),
@@ -244,16 +245,16 @@ end
 text(-4.3,2.5,'A','FontSize',14)
 subplot(2,5,2)
 for i = 1:size(ALM_z)
-    plot(xt(ALM_z,fs)-2.5, ALM_z(i,:)-i,'k'), hold on
+    plot(helper.xt(ALM_z,fs)-2.5, ALM_z(i,:)-i,'k'), hold on
     axis([-2.5 2.5 -15 0.5]),  axis off, title('ALM')
 end
 
 % ----------------------------- panel B ------------------------------
 subplot(2,5,6), hold on,
-    plot(xt(HL_z,fs)-2.5, mean(HL_z), 'k') 
-    shadedErrorBar(xt(HL_z,fs)-2.5, mean(HL_z), sem(HL_z), 'k', 1)
-    plot(xt(HL_z,fs)-2.5, mean(hindlimb_z),'b'); 
-    shadedErrorBar(xt(HL_z,fs)-2.5, mean(hindlimb_z), sem(hindlimb_z), 'b', 1)
+    plot(helper.xt(HL_z,fs)-2.5, mean(HL_z), 'k') 
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5, mean(HL_z), sem(HL_z), 'k', 1)
+    plot(helper.xt(HL_z,fs)-2.5, mean(hindlimb_z),'b'); 
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5, mean(hindlimb_z), sem(hindlimb_z), 'b', 1)
     text(-2,1.05,'Behavior','FontSize',9,'color',[0 0 1])
     text(-2,0.8,'\DeltaF/F_0','FontSize',9,'color',[0 0 0])
     title('HL'), axis([-2.5 2.5 -1 1.2])
@@ -261,18 +262,18 @@ subplot(2,5,6), hold on,
     text(-3.7,1.5,'B','FontSize',14)
 
 subplot(2,5,7), hold on,
-    plot(xt(HL_z,fs)-2.5,mean(ALM_z),'k') 
-    shadedErrorBar(xt(HL_z,fs)-2.5,mean(ALM_z),sem(ALM_z),'k',1)
-    plot(xt(HL_z,fs)-2.5,mean(tongue_z),'b'), 
-    shadedErrorBar(xt(HL_z,fs)-2.5,mean(tongue_z),sem(tongue_z),'b',1)
+    plot(helper.xt(HL_z,fs)-2.5,mean(ALM_z),'k') 
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5,mean(ALM_z),sem(ALM_z),'k',1)
+    plot(helper.xt(HL_z,fs)-2.5,mean(tongue_z),'b'), 
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5,mean(tongue_z),sem(tongue_z),'b',1)
     title('ALM'), axis([-2.5 2.5 -1 1.2])
     xlabel('Time (s)')
 
 subplot(2,5,8), hold on,
-    plot(xt(HL_z,fs)-2.5,mean(BC_z),'k')
-    shadedErrorBar(xt(HL_z,fs)-2.5,mean(BC_z),sem(BC_z),'k',1)
-    plot(xt(HL_z,fs)-2.5,mean(barrel_z),'b'), 
-    shadedErrorBar(xt(HL_z,fs)-2.5,mean(barrel_z),sem(barrel_z),'b',1)
+    plot(helper.xt(HL_z,fs)-2.5,mean(BC_z),'k')
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5,mean(BC_z),sem(BC_z),'k',1)
+    plot(helper.xt(HL_z,fs)-2.5,mean(barrel_z),'b'), 
+    helper.shadedErrorBar(helper.xt(HL_z,fs)-2.5,mean(barrel_z),sem(barrel_z),'b',1)
     title('BC'), axis([-2.5 2.5 -1 1.2])
 
 % ---------------------------- panel C --------------------------------
@@ -326,8 +327,8 @@ subplot(2,5,9.5:10), hold on
     mismatches(:,[1,3,5]) = mismatches(:,[1,3,5])-1000;
     mismatches = cat(2,mismatches(:,1:2),1000*ones(size(matches,1),1),mismatches(:,3:4),...
         1000*ones(size(matches,1),1),mismatches(:,5:6));
-violinplot(matches,{'ALM-mouth','ALM-mouth(s)','','HL-leg','HL-leg(s)'},'ViolinColor',[0 0 1]);
-violinplot(mismatches,{'ALM-mouth','ALM-mouth(s)','','HL-leg','HL-leg(s)'},'ViolinColor',[0 0 0]);
+helper.violinplot(matches,{'ALM-mouth','ALM-mouth(s)','','HL-leg','HL-leg(s)'},'ViolinColor',[0 0 1]);
+helper.violinplot(mismatches,{'ALM-mouth','ALM-mouth(s)','','HL-leg','HL-leg(s)'},'ViolinColor',[0 0 0]);
 axis([0.25 8.75 -1 1.1])
 xticks([1.5,4.5,7.5])
 xticklabels({'ALM-tongue','HL-leg','BC-face'})
@@ -374,9 +375,9 @@ for j = 1:num_animals
     early_traces{j} = format_data(go_early(j).reg.I, CL, CR, radius);
     late_traces{j} = format_data(go_late(j).reg.I, CL, CR, radius);
 end
-success_trials = zscore(catcell(1,hit_traces),[],3);
-early_trials = zscore(catcell(1,early_traces),[],3);
-late_trials = zscore(catcell(1,late_traces),[],3);
+success_trials = zscore(helper.catcell(1,hit_traces),[],3);
+early_trials = zscore(helper.catcell(1,early_traces),[],3);
+late_trials = zscore(helper.catcell(1,late_traces),[],3);
 
 % compile all dFF maps
 single_trial_hit_maps = [];
@@ -399,14 +400,14 @@ cat_maps = cat(1,average_hit,average_early,average_late);
 [subsampled_data, index] = subsample_data(success_trials,early_trials,late_trials);
 
 % run decoder for hit vs early
-dff_data = catcell(1,subsampled_data{1},subsampled_data{2});
+dff_data = helper.catcell(1,subsampled_data{1},subsampled_data{2});
 response = [ones(size(dff_data,1)/2,1); -ones(size(dff_data,1)/2,1)];
-hitvearly = dffPxlDecoder(dff_data,response);
+hitvearly = helper.dffPxlDecoder(dff_data,response);
 
 % run decoder for hit vs late
-dff_data = catcell(1,subsampled_data{1},subsampled_data{3});
+dff_data = helper.catcell(1,subsampled_data{1},subsampled_data{3});
 response = [ones(size(dff_data,1)/2,1); -ones(size(dff_data,1)/2,1)];
-hitvlate = dffPxlDecoder(dff_data,response);
+hitvlate = helper.dffPxlDecoder(dff_data,response);
 
 %% multiple iterations of full and reduced models using random sampling
 
@@ -432,9 +433,9 @@ for nn = 1:length(num_comparisons)
         
         % compare correct vs early and correct vs late
         if nn == 1
-            dff_data = catcell(1,subsampled_data{1},subsampled_data{2});
+            dff_data = helper.catcell(1,subsampled_data{1},subsampled_data{2});
         else
-            dff_data = catcell(1,subsampled_data{1},subsampled_data{3});
+            dff_data = helper.catcell(1,subsampled_data{1},subsampled_data{3});
         end
         response = [ones(size(dff_data,1)/2,1); -ones(size(dff_data,1)/2,1)];
 
@@ -532,9 +533,9 @@ text(-13, -8,'B','FontSize',14)
 
 % -------------------------- panel C ------------------------------
 subplot(4,4,5:7),  hold on
-h1=plot(xt(hitvearly.accuracy,fs)-2.5,100*hitvearly.accuracy,'b');
-h2=plot(xt(hitvlate.accuracy,fs)-2.5,100*hitvlate.accuracy,'r');
-h3=plot(xt(hitvearly.accuracy,fs)-2.5,100*mean(hitvearly.shuffle.accuracy),'color',[0.5 0.5 0.5]);
+h1=plot(helper.xt(hitvearly.accuracy,fs)-2.5,100*hitvearly.accuracy,'b');
+h2=plot(helper.xt(hitvlate.accuracy,fs)-2.5,100*hitvlate.accuracy,'r');
+h3=plot(helper.xt(hitvearly.accuracy,fs)-2.5,100*mean(hitvearly.shuffle.accuracy),'color',[0.5 0.5 0.5]);
 line([0 0], [45 100], 'color',[0 0 0],'LineStyle',':','LineWidth',1.5)
 axis([-2.5 2.5 45 90])
 ylabel('accuracy (%)'), xlabel('time (s)'), 
@@ -592,8 +593,8 @@ for i = 1:length(reduced_model_datasets)
     end
 end
 
-violinplot(X*100,{},'ViolinColor',[0 0 1])
-violinplot(Y*100,{},'ViolinColor',[1 0 0])
+helper.violinplot(X*100,{},'ViolinColor',[0 0 1])
+helper.violinplot(Y*100,{},'ViolinColor',[1 0 0])
 axis([0 8.75 50 85])
 text(0.5,56,'correct vs late','FontSize',8,'Color',[1 0 0])
 text(0.5,58,'correct vs early','FontSize',8,'Color',[0 0 1])
@@ -653,7 +654,7 @@ text(2.175, 35.5,'NS','color',[1 0 0])
 % ----------------------- save figure --------------------------
 % saveas(gcf,[path_info.save_path,'decoding_figure2'])
 
-%% helper functions
+%% more specific helper functions
 
 function roi = get_roi_from_data(data)
 % create binary roi mask from dFF data

@@ -67,7 +67,7 @@ function violins = violinplot(data, cats, varargin)
         end
         for n=1:length(catnames)
             thisData = data.(catnames{n});
-            violins(n) = Violin(thisData, n, varargin{:});
+            violins(n) = helper.Violin(thisData, n, varargin{:});
         end
         set(gca, 'xtick', 1:length(catnames), 'xticklabels', catnames);
 
@@ -78,20 +78,20 @@ function violins = violinplot(data, cats, varargin)
         for n=1:length(catnames)
             thisCat = catnames{n};
             thisData = data(cats == thisCat);
-            violins(n) = Violin(thisData, n, varargin{:});
+            violins(n) = helper.Violin(thisData, n, varargin{:});
         end
         set(gca, 'xtick', 1:length(catnames), 'xticklabels', catnames);
 
     % 1D data, no categories
     elseif not(hascategories) && isvector(data)
-        violins = Violin(data, 1, varargin{:});
+        violins = helper.Violin(data, 1, varargin{:});
         set(gca, 'xtick', 1);
 
     % 2D data with or without categories
     elseif ismatrix(data)
         for n=1:size(data, 2)
             thisData = data(:, n);
-            violins(n) = Violin(thisData, n, varargin{:});
+            violins(n) = helper.Violin(thisData, n, varargin{:});
         end
         set(gca, 'xtick', 1:size(data, 2));
         if hascategories && length(cats) == size(data, 2)
